@@ -43,7 +43,8 @@ class Venue(db.Model):
     phone = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('Show', backref='venue',
+                            lazy=True, cascade='all, delete-orphan')
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -59,7 +60,8 @@ class Artist(db.Model):
     genres = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('Show', backref='artist',
+                            lazy=True, cascade='all, delete-orphan')
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -68,12 +70,15 @@ class Show(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False,
+                           default=datetime.utcnow)
+    artist_id = db.Column(db.Integer, db.ForeignKey(
+        'artists.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey(
+        'venues.id'), nullable=False)
 
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration. (Done!)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -108,27 +113,17 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
+    venues = db.session.query(Venue).order_by(Venue.city).all()
+    locations = {(venue.city, venue.state) for venue in venues}
     data = [{
-        "city": "San Francisco",
-        "state": "CA",
-        "venues": [{
-            "id": 1,
-            "name": "The Musical Hop",
-            "num_upcoming_shows": 0,
-        }, {
-            "id": 3,
-            "name": "Park Square Live Music & Coffee",
-            "num_upcoming_shows": 1,
-        }]
-    }, {
-        "city": "New York",
-        "state": "NY",
-        "venues": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
-    }]
+        'city': location[0],
+        'state': location[1],
+        'venues': [{
+            'id': local_venue.id,
+            'name': local_venue.name,
+            'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time >= datetime.now()).count()
+        } for local_venue in Venue.query.filter_by(city=location[0]).all()]
+    } for location in locations]
     return render_template('pages/venues.html', areas=data)
 
 
