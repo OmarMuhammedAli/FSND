@@ -1,4 +1,6 @@
 import os
+from sqlalchemy.engine.url import URL
+
 SECRET_KEY = os.urandom(32)
 # Grabs the folder where the script runs.
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -7,7 +9,17 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 
 # Connect to the database
+db_uri = {
+    'drivername': 'postgres',
+    'username': 'horizon',
+    'password': '0105415595',
+    'host': 'localhost',
+    'port': 5432,
+    'database': 'fyyur'
+}
 
+# TODO IMPLEMENT DATABASE URL (Done!)
+SQLALCHEMY_DATABASE_URI = URL(**db_uri)
 
-# TODO IMPLEMENT DATABASE URL
-SQLALCHEMY_DATABASE_URI = '<Put your local database url>'
+# Modification tracking
+SQLALCHEMY_TRACK_MODIFICATIONS = False
