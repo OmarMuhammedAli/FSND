@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 import json
+from os import name
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -183,14 +184,52 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
+    form = VenueForm(request.form)
+    data = {
+        'name': form.name.data,
+        'genres': form.genres.data,
+        'address': form.address.data,
+        'city': form.city.data,
+        'state': form.state.data,
+        'phone': form.phone.data,
+        'image_link': form.image_link.data,
+        'facebook_link': form.facebook_link.data,
+        'seeking_talent': form.seeking_talent.data,
+        'seeking_description': form.seeking_description.data,
+        'website': form.website.data
+    }
     # TODO: modify data to be the data object returned from db insertion
-
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+    try: 
+        venue = Venue(
+            name=data['name'], 
+            genres=data['genres'], 
+            address=data['address'],
+            city=data['city'],
+            state=data['state'],
+            phone=data['phone'],
+            image_link=data['image_link'],
+            facebook_link=data['facebook_link'],
+            seeking_talent=data['seeking_talent'],
+            seeking_description=data['seeking_description'],
+            website=data['website']
+        )
+        venues = [ven[0] for ven in db.session.query(Venue.name).filter_by(city=venue.city).all()]
+        if venue.name not in venues:
+            db.session.add(venue)
+            db.session.commit()
+            # on successful db insert, flash success
+            flash('Venue ' + data['name'] + ' was successfully listed!')
+        else: flash('Venue ' + data['name'] + ' already exists')
+    except:
+        # TODO: on unsuccessful db insert, flash an error instead.
+        # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+        # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+        flash('An error occurred. Venue ' + data['name'] + ' could not be listed.')
+        db.session.rollback()
+        print(exc_info())
+    finally:
+        db.session.close() 
+    return redirect(url_for('index'))
 
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
