@@ -59,7 +59,7 @@ def venues():
         'venues': [{
             'id': local_venue.id,
             'name': local_venue.name,
-            'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time >= datetime.now()).count()
+            'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time > datetime.now()).count()
         } for local_venue in Venue.query.filter_by(city=location[0]).all()]
     } for location in locations]
     return render_template('pages/venues.html', areas=data)
