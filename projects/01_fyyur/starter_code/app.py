@@ -200,7 +200,7 @@ def delete_venue(venue_id):
 
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
+    # TODO-: replace with real data returned from querying the database(Done!)
     artists = Artist.query.all()
     data= [{
         'id': artist.id,
@@ -211,16 +211,18 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # TODO-: implement search on artists with partial string search. Ensure it is case-insensitive.(Done!)
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
+    search_term = request.form.get('search_term', '')
+    results = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
     response = {
-        "count": 1,
+        "count": len(results),
         "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+            "id": result.id,
+            "name": result.name,
+            "num_upcoming_shows": Show.query.filter(Show.artist_id == result.id and Show.start_time > datetime.now()),
+        } for result in results]
     }
     return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
