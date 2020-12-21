@@ -7,9 +7,6 @@ import json
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
-from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -17,6 +14,7 @@ from sqlalchemy.orm import backref
 from forms import *
 from datetime import datetime
 from models import *
+from sys import exc_info
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -49,25 +47,29 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: replace with real venues data.
+    # TODO-: replace with real venues data.(Done!)
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    venues = db.session.query(Venue).order_by(Venue.city).all()
-    locations = {(venue.city, venue.state) for venue in venues}
-    data = [{
-        'city': location[0],
-        'state': location[1],
-        'venues': [{
-            'id': local_venue.id,
-            'name': local_venue.name,
-            'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time > datetime.now()).count()
-        } for local_venue in Venue.query.filter_by(city=location[0]).all()]
-    } for location in locations]
+    data = []
+    try:
+        venues = db.session.query(Venue).order_by(Venue.city).all()
+        locations = {(venue.city, venue.state) for venue in venues}
+        data = [{
+            'city': location[0],
+            'state': location[1],
+            'venues': [{
+                'id': local_venue.id,
+                'name': local_venue.name,
+                'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time > datetime.now()).count()
+            } for local_venue in Venue.query.filter_by(city=location[0]).all()]
+        } for location in locations]
+    except:
+        print(exc_info())
     return render_template('pages/venues.html', areas=data)
 
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # TODO-: implement search on artists with partial string search. Ensure it is case-insensitive.(Done!)
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     search_term = request.form.get('search_term', '')
