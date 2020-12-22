@@ -194,7 +194,7 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
+    # TODO-: Complete this endpoint for taking a venue_id, and using(Done!)
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
     try: 
         Show.query.filter_by(venue_id=venue_id).delete()
