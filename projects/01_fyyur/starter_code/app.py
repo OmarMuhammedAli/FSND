@@ -60,7 +60,7 @@ def venues():
             'venues': [{
                 'id': local_venue.id,
                 'name': local_venue.name,
-                'num_upcoming_shows': db.session.query(Show).filter(local_venue.id == Show.venue_id and Show.start_time > datetime.now()).count()
+                'num_upcoming_shows': db.session.query(Show).filter(Show.venue_id == local_venue.id and Show.start_time > datetime.now()).count()
             } for local_venue in Venue.query.filter_by(city=location[0]).all()]
         } for location in locations]
     except:
@@ -92,6 +92,9 @@ def show_venue(venue_id):
     # shows the venue page with the given venue_id
     # TODO-: replace with real venue data from the venues table, using venue_id(Done!)
     venues = Venue.query.all()
+    shows = Show.query.filter_by(venue_id=venue_id).all()
+    past_shows = [show for show in shows if show.start_time <= datetime.now()]
+    upcoming_shows = [show for show in shows if show.start_time > datetime.now()]
     unfiltered_data = [{
         'id': venue.id,
         'name': venue.name,
@@ -109,16 +112,16 @@ def show_venue(venue_id):
             'artist_id': show.artist_id,
             'artist_name': Artist.query.get(show.artist_id).name,
             'artist_image_link': Artist.query.get(show.artist_id).image_link,
-            'start_time': show.start_time
-        } for show in Show.query.filter(Show.venue_id == venue.id and Show.start_time < datetime.now()).all()],
+            'start_time': show.start_time.strftime("%d/%m/%Y, %H:%M")
+        } for show in past_shows],
         'upcoming_shows': [{
             'artist_id': show.artist_id,
             'artist_name': Artist.query.get(show.artist_id).name,
             'artist_image_link': Artist.query.get(show.artist_id).image_link,
-            'start_time': show.start_time
-        } for show in Show.query.filter(Show.venue_id == venue.id and Show.start_time > datetime.now()).all()],
-        'past_shows_count': Show.query.filter(Show.venue_id == venue.id and Show.start_time < datetime.now()).count(),
-        'upcoming_shows_count': Show.query.filter(Show.venue_id == venue.id and Show.start_time > datetime.now()).count()
+            'start_time': show.start_time.strftime("%d/%m/%Y, %H:%M")
+        } for show in upcoming_shows],
+        'past_shows_count': len(past_shows),
+        'upcoming_shows_count': len(upcoming_shows)
     } for venue in venues]
     # debug from starter code if there's a bug.
     data = list(filter(lambda d: d['id'] ==
@@ -234,13 +237,15 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # TODO-: replace with real venue data from the venues table, using venue_id(Done!)
     artists = Artist.query.all()
+    shows = Show.query.filter_by(artist_id=artist_id).all()
+    past_shows = [show for show in shows if show.start_time <= datetime.now()]
+    upcoming_shows = [show for show in shows if show.start_time > datetime.now()]
     unfiltered_data = [{
         'id': artist.id,
         'name': artist.name,
         'genres': artist.genres[1:-1].split(','),
-        
         'city': artist.city,
         'state': artist.state,
         'phone': artist.phone,
@@ -253,16 +258,16 @@ def show_artist(artist_id):
             'venue_id': show.venue_id,
             'venue_name': Venue.query.get(show.venue_id).name,
             'venue_image_link': Venue.query.get(show.venue_id).image_link,
-            'start_time': show.start_time
-        } for show in Show.query.filter(Show.artist_id == artist.id and Show.start_time < datetime.now()).all()],
+            'start_time': show.start_time.strftime("%d/%m/%Y, %H:%M")
+        } for show in past_shows],
         'upcoming_shows': [{
             'venue_id': show.venue_id,
             'venue_name': Venue.query.get(show.venue_id).name,
             'venue_image_link': Venue.query.get(show.venue_id).image_link,
-            'start_time': show.start_time
-        } for show in Show.query.filter(Show.artist_id == artist.id and Show.start_time > datetime.now()).all()],
-        'past_shows_count': Show.query.filter(Show.artist_id == artist.id and Show.start_time < datetime.now()).count(),
-        'upcoming_shows_count': Show.query.filter(Show.artist_id == artist.id and Show.start_time > datetime.now()).count()
+            'start_time': show.start_time.strftime("%d/%m/%Y, %H:%M")
+        } for show in upcoming_shows],
+        'past_shows_count': len(past_shows),
+        'upcoming_shows_count': len(upcoming_shows)
     } for artist in artists]
     # debug from starter code if there's a bug.
     data = list(filter(lambda d: d['id'] ==
