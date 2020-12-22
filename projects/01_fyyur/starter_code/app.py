@@ -62,7 +62,7 @@ def venues():
             'venues': [{
                 'id': local_venue.id,
                 'name': local_venue.name,
-                'num_upcoming_shows': db.session.query(Show).filter(Show.venue_id == local_venue.id and Show.start_time > datetime.now()).count()
+                'num_upcoming_shows': db.session.query(Show).join(Venue).filter(Show.start_time <= datetime.now(), Venue.id == local_venue.id).count()
             } for local_venue in Venue.query.filter_by(city=location[0]).all()]
         } for location in locations]
     except:
@@ -96,9 +96,8 @@ def show_venue(venue_id):
     Shows a specific venue by venue_id. The data structure given was considered in implementation.
     """
     venues = Venue.query.all()
-    shows = Show.query.filter_by(venue_id=venue_id).all()
-    past_shows = [show for show in shows if show.start_time <= datetime.now()]
-    upcoming_shows = [show for show in shows if show.start_time > datetime.now()]
+    past_shows = db.session.query(Show).join(Venue).filter(Show.start_time <= datetime.now(), Venue.id == venue_id).all()
+    upcoming_shows = db.session.query(Show).join(Venue).filter(Show.start_time > datetime.now(), Venue.id == venue_id).all()
     unfiltered_data = [{
         'id': venue.id,
         'name': venue.name,
@@ -256,9 +255,8 @@ def show_artist(artist_id):
     Shows a specific artist by artist_id. The data structure given was considered in implementation.
     """
     artists = Artist.query.all()
-    shows = Show.query.filter_by(artist_id=artist_id).all()
-    past_shows = [show for show in shows if show.start_time <= datetime.now()]
-    upcoming_shows = [show for show in shows if show.start_time > datetime.now()]
+    past_shows = db.session.query(Show).join(Artist).filter(Show.start_time <= datetime.now(), Artist.id == artist_id).all()
+    upcoming_shows = db.session.query(Show).join(Artist).filter(Show.start_time > datetime.now(), Artist.id == artist_id).all()
     unfiltered_data = [{
         'id': artist.id,
         'name': artist.name,
