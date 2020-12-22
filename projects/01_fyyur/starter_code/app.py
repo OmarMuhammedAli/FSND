@@ -74,7 +74,8 @@ def search_venues():
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     search_term = request.form.get('search_term', '')
-    results = db.session.query(Venue).filter(Venue.name.ilike(f'%{search_term}%')).all()
+    results = db.session.query(Venue).filter(
+        Venue.name.ilike(f'%{search_term}%')).all()
     response = {
         "count": len(results),
         "data": [{
@@ -152,10 +153,10 @@ def create_venue_submission():
         'website': form.website.data
     }
     # TODO-: modify data to be the data object returned from db insertion(Done!)
-    try: 
+    try:
         venue = Venue(
-            name=data['name'], 
-            genres=data['genres'], 
+            name=data['name'],
+            genres=data['genres'],
             address=data['address'],
             city=data['city'],
             state=data['state'],
@@ -166,22 +167,25 @@ def create_venue_submission():
             seeking_description=data['seeking_description'],
             website=data['website']
         )
-        venues = [ven[0] for ven in db.session.query(Venue.name).filter_by(city=venue.city).all()]
+        venues = [ven[0] for ven in db.session.query(
+            Venue.name).filter_by(city=venue.city).all()]
         if venue.name not in venues:
             db.session.add(venue)
             db.session.commit()
             # on successful db insert, flash success
             flash('Venue ' + data['name'] + ' was successfully listed!')
-        else: flash('Venue ' + data['name'] + ' already exists')
+        else:
+            flash('Venue ' + data['name'] + ' already exists')
     except:
         # TODO-: on unsuccessful db insert, flash an error instead.(Done!)
         # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
         # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-        flash('An error occurred. Venue ' + data['name'] + ' could not be listed.')
+        flash('An error occurred. Venue ' +
+              data['name'] + ' could not be listed.')
         db.session.rollback()
         print(exc_info())
     finally:
-        db.session.close() 
+        db.session.close()
     return redirect(url_for('index'))
 
 
@@ -202,7 +206,7 @@ def delete_venue(venue_id):
 def artists():
     # TODO-: replace with real data returned from querying the database(Done!)
     artists = Artist.query.all()
-    data= [{
+    data = [{
         'id': artist.id,
         'name': artist.name
     } for artist in artists]
@@ -231,79 +235,38 @@ def search_artists():
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
-    data1 = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-        "past_shows": [{
-            "venue_id": 1,
-            "venue_name": "The Musical Hop",
-            "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
-            "start_time": "2019-05-21T21:30:00.000Z"
-        }],
-        "upcoming_shows": [],
-        "past_shows_count": 1,
-        "upcoming_shows_count": 0,
-    }
-    data2 = {
-        "id": 5,
-        "name": "Matt Quevedo",
-        "genres": ["Jazz"],
-        "city": "New York",
-        "state": "NY",
-        "phone": "300-400-5000",
-        "facebook_link": "https://www.facebook.com/mattquevedo923251523",
-        "seeking_venue": False,
-        "image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-        "past_shows": [{
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2019-06-15T23:00:00.000Z"
-        }],
-        "upcoming_shows": [],
-        "past_shows_count": 1,
-        "upcoming_shows_count": 0,
-    }
-    data3 = {
-        "id": 6,
-        "name": "The Wild Sax Band",
-        "genres": ["Jazz", "Classical"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "432-325-5432",
-        "seeking_venue": False,
-        "image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "past_shows": [],
-        "upcoming_shows": [{
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-01T20:00:00.000Z"
-        }, {
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-08T20:00:00.000Z"
-        }, {
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-15T20:00:00.000Z"
-        }],
-        "past_shows_count": 0,
-        "upcoming_shows_count": 3,
-    }
+    artists = Artist.query.all()
+    unfiltered_data = [{
+        'id': artist.id,
+        'name': artist.name,
+        'genres': artist.genres[1:-1].split(','),
+        
+        'city': artist.city,
+        'state': artist.state,
+        'phone': artist.phone,
+        'website': artist.website,
+        'facebook_link': artist.facebook_link,
+        'seeking_venue': artist.seeking_venue,
+        'seeking_description': artist.seeking_description,
+        'image_link': artist.image_link,
+        'past_shows': [{
+            'venue_id': show.venue_id,
+            'venue_name': Venue.query.get(show.venue_id).name,
+            'venue_image_link': Venue.query.get(show.venue_id).image_link,
+            'start_time': show.start_time
+        } for show in Show.query.filter(Show.artist_id == artist.id and Show.start_time < datetime.now()).all()],
+        'upcoming_shows': [{
+            'venue_id': show.venue_id,
+            'venue_name': Venue.query.get(show.venue_id).name,
+            'venue_image_link': Venue.query.get(show.venue_id).image_link,
+            'start_time': show.start_time
+        } for show in Show.query.filter(Show.artist_id == artist.id and Show.start_time > datetime.now()).all()],
+        'past_shows_count': Show.query.filter(Show.artist_id == artist.id and Show.start_time < datetime.now()).count(),
+        'upcoming_shows_count': Show.query.filter(Show.artist_id == artist.id and Show.start_time > datetime.now()).count()
+    } for artist in artists]
+    # debug from starter code if there's a bug.
     data = list(filter(lambda d: d['id'] ==
-                       artist_id, [data1, data2, data3]))[0]
+                       artist_id, unfiltered_data))[0]
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
@@ -393,10 +356,10 @@ def create_artist_submission():
         'website': form.website.data
     }
     # TODO-: modify data to be the data object returned from db insertion(Done!)
-    try: 
+    try:
         artist = Artist(
-            name=data['name'], 
-            genres=data['genres'], 
+            name=data['name'],
+            genres=data['genres'],
             city=data['city'],
             state=data['state'],
             phone=data['phone'],
@@ -414,11 +377,12 @@ def create_artist_submission():
         # TODO-: on unsuccessful db insert, flash an error instead.(Done!)
         # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
         # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-        flash('An error occurred. Artist ' + data['name'] + ' could not be listed.')
+        flash('An error occurred. Artist ' +
+              data['name'] + ' could not be listed.')
         db.session.rollback()
         print(exc_info())
     finally:
-        db.session.close() 
+        db.session.close()
     return redirect(url_for('index'))
 
 
