@@ -35,7 +35,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String)
     shows = db.relationship('Show', backref='venue',
-                            lazy=True, cascade='all, delete-orphan')
+                            lazy=True, cascade='all,delete')
 
     def __repr__(self):
         return f'<Venue no. {self.id} name: {self.name}>'
@@ -57,7 +57,7 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String)
     shows = db.relationship('Show', backref='artist',
-                            lazy=True, cascade='all, delete-orphan')
+                            lazy=True, cascade='all,delete')
 
     def __repr__(self):
         return f'<Artist no. {self.id} name: {self.name}>'
