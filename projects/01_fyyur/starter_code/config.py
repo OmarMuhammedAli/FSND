@@ -18,7 +18,6 @@ db_uri = {
     'database': 'fyyur'
 }
 
-# TODO IMPLEMENT DATABASE URL (Done!)
 SQLALCHEMY_DATABASE_URI = URL(**db_uri)
 
 # Modification tracking
