@@ -322,7 +322,7 @@ def edit_artist_submission(artist_id):
         db.session.commit()
     except:
         db.session.rollback()
-        print(exc_info)
+        print(exc_info())
     finally:
         db.session.close()
     return redirect(url_for('show_artist', artist_id=artist_id))
@@ -355,7 +355,7 @@ def edit_venue_submission(venue_id):
         db.session.commit()
     except:
         db.session.rollback()
-        print(exc_info)
+        print(exc_info())
     finally:
         db.session.close()
     return redirect(url_for('show_venue', venue_id=venue_id))
