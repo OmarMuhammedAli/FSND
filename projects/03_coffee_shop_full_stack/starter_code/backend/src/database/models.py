@@ -34,6 +34,7 @@ Drink
 a persistent drink entity, extends the base SQLAlchemy Model
 '''
 class Drink(db.Model):
+    __tablename__ = 'drinks'
     # Autoincrementing, unique primary key
     id = Column(Integer().with_variant(Integer, "sqlite"), primary_key=True)
     # String Title
