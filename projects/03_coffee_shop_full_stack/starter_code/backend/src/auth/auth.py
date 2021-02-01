@@ -1,5 +1,5 @@
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -14,8 +14,6 @@ API_AUDIENCE = 'dev'
 AuthError Exception
 A standardized way to communicate auth failure modes
 '''
-
-
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -96,7 +94,7 @@ def check_permissions(permission, payload):
 
 
 '''
-@TODO implement verify_decode_jwt(token) method
+@TODO- implement verify_decode_jwt(token) method
     @INPUTS
         token: a json web token (string)
 
@@ -107,6 +105,7 @@ def check_permissions(permission, payload):
     return the decoded payload
 
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
+    (Done!)
 '''
 
 
@@ -153,19 +152,20 @@ def verify_decode_jwt(token):
                              "Unable to parse authentication"
                              " token."}, 401)
     raise AuthError({
-                'code': 'invalid_header',
+        'code': 'invalid_header',
                 'description': 'Unable to find the appropriate key.'
-            }, 400)
+    }, 400)
+
 
 '''
-@TODO implement @requires_auth(permission) decorator method
+@TODO- implement @requires_auth(permission) decorator method
     @INPUTS
         permission: string permission (i.e. 'post:drink')
 
     it should use the get_token_auth_header method to get the token
     it should use the verify_decode_jwt method to decode the jwt
     it should use the check_permissions method validate claims and check the requested permission
-    return the decorator which passes the decoded payload to the decorated method
+    return the decorator which passes the decoded payload to the decorated method(Done!)
 '''
 
 
@@ -174,9 +174,11 @@ def requires_auth(permission=''):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            payload = verify_decode_jwt(token)
-            check_permissions(permission, payload)
+            try:
+                payload = verify_decode_jwt(token)
+            except:
+                abort(401)
+            check_permissions(permission=permission, payload=payload)
             return f(payload, *args, **kwargs)
-
         return wrapper
     return requires_auth_decorator
