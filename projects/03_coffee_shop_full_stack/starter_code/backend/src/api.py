@@ -77,7 +77,22 @@ def get_drinks_detail(payload):
 @app.route('drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def create_drink(payload):
-    ...
+    try:
+        body = request.get_json()
+        title = body.get('title', None)
+        recipe = body.get('recipe', None)
+        if title is None or recipe is None:
+            abort(400)
+        drink = Drink(title=title, recipe=json.dumps(recipe))
+        drink.insert()
+        return jsonify({
+            'success': True,
+            'drinks': drink.long()
+        }), 200
+    except:
+        abort(422)
+        
+
 
 
 '''
