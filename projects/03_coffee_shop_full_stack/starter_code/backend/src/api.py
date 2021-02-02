@@ -37,7 +37,7 @@ def format_recipe(recipe):
                 return None
         return json.dumps(recipe)
     else:
-        name, color, parts = r.get('name', None), r.get('color', None), r.get('parts', None)
+        name, color, parts = recipe.get('name', None), recipe.get('color', None), recipe.get('parts', None)
         if not isinstance(name, str):
             return None
         if not isinstance(color, str):
@@ -67,7 +67,7 @@ def get_drinks():
             'drinks': [drink.short() for drink in drinks]
         }), 200
     except:
-        abort(500)
+        abort(404)
 
 
 
@@ -91,7 +91,7 @@ def get_drinks_detail(payload):
             'drinks': [drink.long() for drink in drinks]
         }), 200
     except:
-        abort(500)
+        abort(404)
 
 '''
 @TODO- implement endpoint
@@ -102,7 +102,7 @@ def get_drinks_detail(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure(Done!)
 '''
-@app.route('drinks', methods=['POST'])
+@app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def create_drink(payload):
     try:
@@ -117,7 +117,7 @@ def create_drink(payload):
 
         if formatted_recipe is None:
             abort(422)
-            
+
         drink = Drink(title=title, recipe=formatted_recipe)
         drink.insert()
         return jsonify({
@@ -131,7 +131,7 @@ def create_drink(payload):
 
 
 '''
-@TODO implement endpoint
+@TODO- implement endpoint
     PATCH /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -139,34 +139,54 @@ def create_drink(payload):
         it should require the 'patch:drinks' permission
         it should contain the drink.long() data representation
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
+        or appropriate status code indicating reason for failure(Done!)
 '''
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
 def update_drink(payload, id):
+    drink = Drink.query.get(id)
+    if drink is None:
+        abort(404)
+    
+    body = request.get_json()
     try:
-        drink = Drink.query.get(id)
-        if drink is None:
-            abort(404)
+        if 'title' in body:
+            drink.title = body.get('title')
+        
+        if 'recipe' in body:
+            formatted_recipe = format_recipe(body.get('recipe'))
+            if formatted_recipe is None:
+                abort(422)
+            drink.recipe = formatted_recipe
+        
+        drink.update()
+        return jsonify({
+            'success': True,
+            'drinks': [drink.long()]
+        })
+    except:
+        abort(422)
+
         
 
 
-'''
-@TODO implement endpoint
-    DELETE /drinks/<id>
-        where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should delete the corresponding row for <id>
-        it should require the 'delete:drinks' permission
-    returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
-        or appropriate status code indicating reason for failure
-'''
+# '''
+# @TODO implement endpoint
+#     DELETE /drinks/<id>
+#         where <id> is the existing model id
+#         it should respond with a 404 error if <id> is not found
+#         it should delete the corresponding row for <id>
+#         it should require the 'delete:drinks' permission
+#     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
+#         or appropriate status code indicating reason for failure
+# '''
 
 
-# Error Handling
-'''
-Example error handling for unprocessable entity
-'''
+
+# # Error Handling
+# '''
+# Example error handling for unprocessable entity
+# '''
 
 
 @app.errorhandler(HTTPException)
