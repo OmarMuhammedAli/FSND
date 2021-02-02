@@ -59,7 +59,7 @@ def format_recipe(recipe):
 def get_drinks():
     """
     Gets public info about the drinks
-    return: On a successful call, returns a json object as follows: 
+    return: On a successful call, returns a json object as follows:
     {
         'success': True,
         'drinks': short representation for the available drinks
@@ -83,7 +83,7 @@ def get_drinks_detail(payload):
     params: {
         payload: json object contains the claims included in the jwt.
     }
-    return: Upon a successful call: 
+    return: Upon a successful call:
     {
         'success': True,
         'drinks': Detailed representation of the drinks
@@ -111,7 +111,7 @@ def create_drink(payload):
     params: {
         payload: json object contains the claims included in the jwt.
     }
-    return: Upon a successful call: 
+    return: Upon a successful call:
     {
         'success': True,
         'drinks': A list representation of the newely posted drink
@@ -150,7 +150,7 @@ def update_drink(payload, id):
         payload: json object contains the claims included in the jwt,
         id: the id of the drink to be updated
     }
-    return: Upon a successful call: 
+    return: Upon a successful call:
     {
         'success': True,
         'drinks': Detailed representation of the updated drink
@@ -191,7 +191,7 @@ def delete_drink(payload, id):
         payload: json object contains the claims included in the jwt,
         id: The id of the drink to be deleted
     }
-    return: Upon a successful call: 
+    return: Upon a successful call:
     {
             'success': True,
             'delete': The id of the deleted drink
