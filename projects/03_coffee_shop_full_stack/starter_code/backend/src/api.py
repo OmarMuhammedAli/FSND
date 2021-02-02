@@ -21,22 +21,25 @@ CORS(app)
 
 # ROUTES
 '''
-@TODO implement endpoint
+@TODO- implement endpoint
     GET /drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
+        or appropriate status code indicating reason for failure (Done!)
 '''
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
-    drinks = Drink.query.order_by(Drink.id).all()
-    if len(drinks) < 1:
-        abort(404)
-    return jsonify({
-        'success': True,
-        'drinks': [drink.short() for drink in drinks]
-    }), 200
+    try:
+        drinks = Drink.query.order_by(Drink.id).all()
+        if len(drinks) < 1:
+            abort(404)
+        return jsonify({
+            'success': True,
+            'drinks': [drink.short() for drink in drinks]
+        }), 200
+    except:
+        abort(500)
 
 
 
@@ -48,7 +51,19 @@ def get_drinks():
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks-detail', methods=['GET'])
+@requires_auth('get:drinks-detail')
+def get_drinks_detail(payload):
+    try: 
+        drinks = Drink.query.order_by(Drink.id).all()
+        if len(drinks) < 1:
+            abort(404)
+        return jsonify({
+            'success': True,
+            'drinks': [drink.long() for drink in drinks]
+        }), 200
+    except:
+        abort(500)
 
 '''
 @TODO implement endpoint
@@ -59,6 +74,10 @@ def get_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('drinks', methods=['POST'])
+@requires_auth('post:drinks')
+def create_drink(payload):
+    ...
 
 
 '''
