@@ -35,8 +35,9 @@ def format_recipe(recipe):
                 return None
             if not isinstance(parts, (int, float)):
                 return None
-        return json.dumps(recipe)
+        return recipe
     else:
+        lst = []
         name, color, parts = recipe.get('name', None), recipe.get('color', None), recipe.get('parts', None)
         if not isinstance(name, str):
             return None
@@ -44,7 +45,8 @@ def format_recipe(recipe):
             return None
         if not isinstance(parts, (int, float)):
             return None
-        return json.dumps(list(recipe))
+        lst.append(recipe)
+        return lst
             
 
 # ROUTES
@@ -58,16 +60,15 @@ def format_recipe(recipe):
 '''
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
-    try:
-        drinks = Drink.query.order_by(Drink.id).all()
-        if len(drinks) < 1:
-            abort(404)
-        return jsonify({
-            'success': True,
-            'drinks': [drink.short() for drink in drinks]
-        }), 200
-    except:
-        abort(404)
+
+    drinks = Drink.query.order_by(Drink.id).all()
+    # if len(drinks) < 1:
+    #     abort(404)
+    return jsonify({
+        'success': True,
+        'drinks': [drink.short() for drink in drinks]
+    }), 200
+    
 
 
 
@@ -84,8 +85,8 @@ def get_drinks():
 def get_drinks_detail(payload):
     try: 
         drinks = Drink.query.order_by(Drink.id).all()
-        if len(drinks) < 1:
-            abort(404)
+        # if len(drinks) < 1:
+        #     abort(404)
         return jsonify({
             'success': True,
             'drinks': [drink.long() for drink in drinks]
@@ -114,11 +115,10 @@ def create_drink(payload):
             abort(400)
 
         formatted_recipe = format_recipe(recipe)
-
         if formatted_recipe is None:
             abort(422)
-
-        drink = Drink(title=title, recipe=formatted_recipe)
+        
+        drink = Drink(title=title, recipe=json.dumps(formatted_recipe))
         drink.insert()
         return jsonify({
             'success': True,
@@ -157,13 +157,13 @@ def update_drink(payload, id):
             formatted_recipe = format_recipe(body.get('recipe'))
             if formatted_recipe is None:
                 abort(422)
-            drink.recipe = formatted_recipe
+            drink.recipe = json.dumps(formatted_recipe)
         
         drink.update()
         return jsonify({
             'success': True,
             'drinks': [drink.long()]
-        })
+        }), 200
     except:
         abort(422)
 
@@ -180,6 +180,21 @@ def update_drink(payload, id):
 #     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
 #         or appropriate status code indicating reason for failure
 # '''
+@app.route('/drinks/<int:id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(payload, id):
+    try:
+        drink = Drink.query.get(id)
+        if drink is None:
+            abort(404)
+        drink_id = drink.id
+        drink.delete()
+        return jsonify({
+            'success': True,
+            'delete': drink_id
+        }), 200
+    except:
+        abort(404)
 
 
 
