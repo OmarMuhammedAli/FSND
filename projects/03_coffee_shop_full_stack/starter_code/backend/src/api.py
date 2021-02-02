@@ -57,7 +57,14 @@ def format_recipe(recipe):
 
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
-    """Gets public info about the drinks"""
+    """
+    Gets public info about the drinks
+    return: On a successful call, returns a json object as follows: 
+    {
+        'success': True,
+        'drinks': short representation for the available drinks
+    }
+    """
     drinks = Drink.query.order_by(Drink.id).all()
     # if len(drinks) < 1:
     #     abort(404)
@@ -70,7 +77,18 @@ def get_drinks():
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
 def get_drinks_detail(payload):
-    """Gets detailed info about the drinks"""
+    """
+    Gets detailed info about the drinks
+    expects a 'get:drinks-detail' permission to be included in the payload
+    params: {
+        payload: json object contains the claims included in the jwt.
+    }
+    return: Upon a successful call: 
+    {
+        'success': True,
+        'drinks': Detailed representation of the drinks
+    }
+    """
     try:
         drinks = Drink.query.order_by(Drink.id).all()
         # if len(drinks) < 1:
@@ -79,14 +97,26 @@ def get_drinks_detail(payload):
             'success': True,
             'drinks': [drink.long() for drink in drinks]
         }), 200
-    except:
+    except Exception as e:
+        print(e)
         abort(404)
 
 
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def create_drink(payload):
-    """Adds a drink in the db"""
+    """
+    Adds a drink in the db
+    expects a 'post:drinks' permission to be included in the payload
+    params: {
+        payload: json object contains the claims included in the jwt.
+    }
+    return: Upon a successful call: 
+    {
+        'success': True,
+        'drinks': A list representation of the newely posted drink
+    }
+    """
     try:
         body = request.get_json()
         title = body.get('title', None)
@@ -105,14 +135,27 @@ def create_drink(payload):
             'success': True,
             'drinks': [drink.long()]
         }), 200
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
 
 
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
 def update_drink(payload, id):
-    """Updates a drink in the db"""
+    """
+    Updates a drink in the db
+    expects a 'patch:drinks' permission to be included in the payload
+    params: {
+        payload: json object contains the claims included in the jwt,
+        id: the id of the drink to be updated
+    }
+    return: Upon a successful call: 
+    {
+        'success': True,
+        'drinks': Detailed representation of the updated drink
+    }
+    """
     drink = Drink.query.get(id)
     if drink is None:
         abort(404)
@@ -133,14 +176,27 @@ def update_drink(payload, id):
             'success': True,
             'drinks': [drink.long()]
         }), 200
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
 
 
 @app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
 def delete_drink(payload, id):
-    """Deletes a drink from the db"""
+    """
+    Deletes a drink from the db
+    expects a 'delete:drinks' permission to be included in the payload
+    params: {
+        payload: json object contains the claims included in the jwt,
+        id: The id of the drink to be deleted
+    }
+    return: Upon a successful call: 
+    {
+            'success': True,
+            'delete': The id of the deleted drink
+    }
+    """
     try:
         drink = Drink.query.get(id)
         if drink is None:
@@ -151,7 +207,8 @@ def delete_drink(payload, id):
             'success': True,
             'delete': drink_id
         }), 200
-    except:
+    except Exception as e:
+        print(e)
         abort(404)
 
 # # Error Handling
