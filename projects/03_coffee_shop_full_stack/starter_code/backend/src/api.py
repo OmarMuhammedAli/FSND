@@ -19,6 +19,34 @@ CORS(app)
 '''
 # db_drop_and_create_all()
 
+
+def formatted_recipe(recipe):
+    """
+    Makes sure that every recipe is formatted correctly before being saved to the db
+    """
+    if not isinstance(recipe, (list, dict)):
+        return None
+    if isinstance(recipe, list):
+        for r in recipe:
+            name, color, parts = r.get('name', None), r.get('color', None), r.get('parts', None)
+            if not isinstance(name, str):
+                return None
+            if not isinstance(color, str):
+                return None
+            if not isinstance(parts, (int, float)):
+                return None
+        return recipe
+    else:
+        name, color, parts = r.get('name', None), r.get('color', None), r.get('parts', None)
+        if not isinstance(name, str):
+            return None
+        if not isinstance(color, str):
+            return None
+        if not isinstance(parts, (int, float)):
+            return None
+        return list(recipe)
+            
+
 # ROUTES
 '''
 @TODO- implement endpoint
@@ -66,13 +94,13 @@ def get_drinks_detail(payload):
         abort(500)
 
 '''
-@TODO implement endpoint
+@TODO- implement endpoint
     POST /drinks
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
         it should contain the drink.long() data representation
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
-        or appropriate status code indicating reason for failure
+        or appropriate status code indicating reason for failure(Done!)
 '''
 @app.route('drinks', methods=['POST'])
 @requires_auth('post:drinks')
@@ -87,7 +115,7 @@ def create_drink(payload):
         drink.insert()
         return jsonify({
             'success': True,
-            'drinks': drink.long()
+            'drinks': [drink.long()]
         }), 200
     except:
         abort(422)
@@ -106,6 +134,14 @@ def create_drink(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def update_drink(payload, id):
+    try:
+        drink = Drink.query.get(id)
+        if drink is None:
+            abort(404)
+        
 
 
 '''
