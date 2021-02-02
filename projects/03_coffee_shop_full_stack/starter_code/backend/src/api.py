@@ -20,7 +20,7 @@ CORS(app)
 # db_drop_and_create_all()
 
 
-def formatted_recipe(recipe):
+def format_recipe(recipe):
     """
     Makes sure that every recipe is formatted correctly before being saved to the db
     """
@@ -35,7 +35,7 @@ def formatted_recipe(recipe):
                 return None
             if not isinstance(parts, (int, float)):
                 return None
-        return recipe
+        return json.dumps(recipe)
     else:
         name, color, parts = r.get('name', None), r.get('color', None), r.get('parts', None)
         if not isinstance(name, str):
@@ -44,7 +44,7 @@ def formatted_recipe(recipe):
             return None
         if not isinstance(parts, (int, float)):
             return None
-        return list(recipe)
+        return json.dumps(list(recipe))
             
 
 # ROUTES
@@ -109,9 +109,16 @@ def create_drink(payload):
         body = request.get_json()
         title = body.get('title', None)
         recipe = body.get('recipe', None)
+
         if title is None or recipe is None:
             abort(400)
-        drink = Drink(title=title, recipe=json.dumps(recipe))
+
+        formatted_recipe = format_recipe(recipe)
+
+        if formatted_recipe is None:
+            abort(422)
+            
+        drink = Drink(title=title, recipe=formatted_recipe)
         drink.insert()
         return jsonify({
             'success': True,
